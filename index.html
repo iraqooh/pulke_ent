@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <title>Pulke ENT – Free Download links for Movies & TV Shows</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .loader { border: 6px solid #1f2937; border-top: 6px solid #3b82f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 40px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .suggestion:hover { background: #374151; }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <h1 onclick="goHome()" class="text-3xl font-bold text-blue-400 cursor-pointer">
+        <i class="fas fa-film mr-2"></i>Pulke ENT
+      </h1>
+      <div class="relative w-full max-w-xl">
+        <input type="text" id="searchInput" placeholder="Search movies or TV shows..." 
+               class="w-full px-5 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="off">
+        <div id="suggestions" class="absolute top-full left-0 right-0 bg-gray-800 border border-gray-700 rounded-lg mt-2 max-h-96 overflow-y-auto hidden shadow-2xl z-50"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div id="loading" class="loader hidden"></div>
+    <div id="content"></div>
+  </main>
+
+  <script>
+    const OMDB_KEY = "a8d55169"; 
+    const BASE = "https://www.omdbapi.com/?apikey=" + OMDB_KEY;
+
+    // === Manual Download Links Database (YOU edit this) ===
+    const downloadLinks = {
+      // Format: "imdbID": [{ quality: "1080p", size: "4.2 GB", link: "https://..." }, ...]
+      "tt13951052": [ // Revival (2025)
+        { quality: "Season 1 720p", size: "2.89 GB", link: "https://pixeldrain.com/u/U2JatJUh"}
+      ],
+      "tt32559610": [ // Countdown (2025)
+        { quality: "Season 1 480p", size: "2.47 GB", link: "https://pixeldrain.com/u/b86irPC4"}
+      ],
+      "tt4378376": [ // Babylon Berlin (2017 - 2025)
+        { quality: "Season 4 720p", size: "4.19 GB", link: "https://pixeldrain.com/u/JUbaEf2X"}
+      ],
+      "tt33029688": [ // Olympo (2025)
+        { quality: "Season 1 720p", size: "2.32 GB", link: "https://pixeldrain.com/u/wmQF1SxA"}
+      ]
+    };
+
+    const searchInput = document.getElementById("searchInput");
+    const suggestions = document.getElementById("suggestions");
+    const content = document.getElementById("content");
+    const loading = document.getElementById("loading");
+
+    function showLoading() { loading.classList.remove("hidden"); }
+    function hideLoading() { loading.classList.add("hidden"); }
+
+    function goHome() {
+      history.pushState({}, "", "/");
+      loadTrending();
+      searchInput.value = "";
+      suggestions.classList.add("hidden");
+    }
+
+    // === Trending (hardcoded popular titles – change anytime) ===
+    const trendingIds = [
+      "tt0944947","tt0903747","tt4574334","tt0411008","tt0108778","tt0149460",
+      "tt1190634","tt2802850","tt2707408","tt0773262","tt1442449","tt1475582"
+    ];
+
+    async function loadTrending() {
+      showLoading();
+      content.innerHTML = `<h2 class="text-4xl font-bold mb-8 text-center text-blue-300">Trending Now</h2>`;
+      const grid = document.createElement("div");
+      grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6";
+
+      for (const id of trendingIds) {
+        const data = await fetch(`${BASE}&i=${id}`).then(r => r.json());
+        if (data.Response === "True") createCard(data, grid);
+      }
+      content.appendChild(grid);
+      hideLoading();
+    }
+
+    function createCard(item, parent) {
+      const poster = item.Poster !== "N/A" ? item.Poster : "https://via.placeholder.com/300x450?text=No+Image";
+      const year = item.Year || "N/A";
+      const type = item.Type === "series" ? "TV Series" : "Movie";
+
+      const card = document.createElement("div");
+      card.className = "cursor-pointer transform hover:scale-105 transition duration-300";
+      card.onclick = () => showDetails(item.imdbID);
+
+      card.innerHTML = `
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-xl">
+          <img src="${poster}" alt="${item.Title}" class="w-full h-64 object-cover" loading="lazy">
+          <div class="p-4">
+            <h3 class="font-bold text-sm truncate">${item.Title}</h3>
+            <p class="text-xs text-gray-400">${year} • ${type}</p>
+            <p class="text-xs text-yellow-400 mt-1">IMDb ${item.imdbRating || "N/A"}</p>
+          </div>
+        </div>
+      `;
+      parent.appendChild(card);
+    }
+
+    // === Search with suggestions ===
+    searchInput.addEventListener("input", async () => {
+      const q = searchInput.value.trim();
+      if (q.length < 2) { suggestions.innerHTML = ""; suggestions.classList.add("hidden"); return; }
+
+      const res = await fetch(`${BASE}&s=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      suggestions.innerHTML = "";
+      if (data.Search) {
+        suggestions.classList.remove("hidden");
+        data.Search.slice(0, 8).forEach(item => {
+          const div = document.createElement("div");
+          div.className = "p-4 suggestion flex items-center space-x-4 border-b border-gray-700 cursor-pointer";
+          div.innerHTML = `
+            <img src="${item.Poster !== "N/A" ? item.Poster : "https://via.placeholder.com/60"}" class="w-12 h-18 object-cover rounded" alt="">
+            <div>
+              <p class="font-medium">${item.Title}</p>
+              <p class="text-xs text-gray-400">${item.Year} • ${item.Type}</p>
+            </div>
+          `;
+          div.onclick = () => {
+            showDetails(item.imdbID);
+            searchInput.value = item.Title;
+            suggestions.classList.add("hidden");
+          };
+          suggestions.appendChild(div);
+        });
+      } else {
+        suggestions.classList.add("hidden");
+      }
+    });
+
+    // Press Enter → full search
+    searchInput.addEventListener("keypress", e => {
+      if (e.key === "Enter" && searchInput.value) searchFull(searchInput.value);
+    });
+
+    async function searchFull(query) {
+      console.log(query);
+      history.pushState({}, "", `?s=${encodeURIComponent(query)}`);
+      showLoading();
+      content.innerHTML = `<h2 class="text-4xl font-bold mb-8">Search: "${query}"</h2>`;
+      const res = await fetch(`${BASE}&s=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      const grid = document.createElement("div");
+      grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6";
+
+      if (data.Search) {
+        for (const item of data.Search) {
+          const full = await fetch(`${BASE}&i=${item.imdbID}`).then(r => r.json());
+          if (full.Response === "True") createCard(full, grid);
+        }
+      } else {
+        content.innerHTML += `<p class="text-center text-gray-400 text-xl">No results found.</p>`;
+      }
+      content.appendChild(grid);
+      hideLoading();
+    }
+
+    // === Show Details + Manual Links + Suggest Form ===
+    async function showDetails(imdbID) {
+      history.pushState({}, "", `?i=${imdbID}`);
+      showLoading();
+      const res = await fetch(`${BASE}&i=${imdbID}&plot=full`);
+      const movie = await res.json();
+
+      const hasLinks = downloadLinks[imdbID] && downloadLinks[imdbID].length > 0;
+
+      content.innerHTML = `
+        <div class="max-w-5xl mx-auto">
+          <button onclick="history.back()" class="mb-6 text-blue-400 hover:underline text-lg">
+            Back
+          </button>
+
+          <div class="grid md:grid-cols-3 gap-8 bg-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+            <div>
+              <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/400"}" 
+                   alt="${movie.Title}" class="w-full">
+            </div>
+            <div class="md:col-span-2 p-6">
+              <h1 class="text-4xl font-bold mb-2">${movie.Title}</h1>
+              <p class="text-2xl text-gray-400 mb-4">${movie.Year} • ${movie.Type.toUpperCase()}</p>
+              <p class="text-yellow-400 text-xl mb-4">IMDb ${movie.imdbRating} / 10</p>
+              <p class="text-gray-300 mb-6 leading-relaxed">${movie.Plot}</p>
+
+              <div class="space-y-6">
+                ${hasLinks ? `
+                  <div>
+                    <h3 class="text-2xl font-bold mb-4 text-green-400">Download Links</h3>
+                    ${downloadLinks[imdbID].map(l => `
+                      <a href="${l.link}" target="_blank" 
+                         class="block mb-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-8 rounded-lg text-center transition">
+                        ${l.quality} • ${l.size}
+                      </a>
+                    `).join("")}
+                  </div>
+                ` : `
+                  <div class="bg-orange-900/40 p-6 rounded-xl border border-orange-600">
+                    <p class="text-orange-300 text-lg">No download links yet.</p>
+                  </div>
+                `}
+
+                <!-- Suggest Link Form (uses Formspree – change YOUR-EMAIL@domain.com) -->
+                <div class="bg-gray-700 p-6 rounded-xl">
+                  <h3 class="text-xl font-bold mb-4 text-blue-300">Missing a link? Suggest one!</h3>
+                  <form action="https://formspree.io/f/xrbnynqr" method="POST" class="space-y-4">
+                    <input type="hidden" name="Title" value="${movie.Title} (${movie.Year})">
+                    <input type="hidden" name="IMDb ID" value="${imdbID}">
+                    <input type="text" name="Quality" placeholder="e.g. 1080p Bluray" required
+                           class="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" name="Size" placeholder="e.g. 4.2 GB" class="w-full px-4 py-2 bg-gray-800 rounded-lg">
+                    <input type="url" name="Link" placeholder="Direct download or magnet link" required
+                           class="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="email" name="_replyto" placeholder="Your email (optional)" 
+                           class="w-full px-4 py-2 bg-gray-800 rounded-lg">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition">
+                      Send Suggestion
+                    </button>
+                  </form>
+                  <p class="text-xs text-gray-400 mt-3">Your suggestion will be reviewed and added if valid.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      hideLoading();
+    }
+
+    // Handle navigation
+    window.addEventListener("popstate", () => {
+      const params = new URLSearchParams(location.search);
+      const i = params.get("i");
+      const s = params.get("s");
+      if (i) showDetails(i);
+      else if (s) { searchInput.value = s; searchFull(s); }
+      else goHome();
+    });
+
+    // Initial load
+    window.onload = () => {
+      const params = new URLSearchParams(location.search);
+      if (params.get("i")) showDetails(params.get("i"));
+      else if (params.get("s")) { searchInput.value = params.get("s"); searchFull(params.get("s")); }
+      else loadTrending();
+    };
+  </script>
+</body>
+</html>

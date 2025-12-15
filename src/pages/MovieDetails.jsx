@@ -5,26 +5,7 @@ import { Query } from 'appwrite';
 import toast from 'react-hot-toast';
 import { fetchById } from '../lib/omdb';
 import { Helmet } from 'react-helmet-async';
-
-function AdBanner({ adClient, adSlot, style = { display: 'block', width: '100%', height: 90 } }) {
-  useEffect(() => {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error('AdSense error:', err);
-    }
-  }, []);
-
-  return (
-    <ins className="adsbygoogle"
-         style={style}
-         data-ad-client={adClient}
-         data-ad-slot={adSlot}
-         data-ad-format="auto"
-         data-full-width-responsive="true">
-    </ins>
-  );
-}
+import AdBanner from '../components/AdBanner';
 
 export default function MovieDetails() {
   const { imdbID } = useParams();
@@ -126,7 +107,7 @@ export default function MovieDetails() {
 
             {/* Ad above download links */}
             <div className="flex justify-center mb-6">
-              <AdBanner adClient="ca-pub-XXXXXXXXXXXXXXX" adSlot="1111111111" style={{ display: 'block', width: '100%', height: 90 }} />
+              <AdBanner adSlot="1601345877" />
             </div>
 
             <div className="space-y-6">
@@ -148,7 +129,7 @@ export default function MovieDetails() {
 
               {/* Ad below suggestion form */}
               <div className="flex justify-center my-6">
-                <AdBanner adClient="ca-pub-XXXXXXXXXXXXXXX" adSlot="2222222222" style={{ display: 'block', width: '100%', height: 90 }} />
+                <AdBanner adSlot="7548818887" />
               </div>
 
               <div className="bg-gray-700 p-6 rounded-xl">

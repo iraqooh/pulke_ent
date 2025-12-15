@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import { Helmet } from 'react-helmet-async';
+import AdBanner from '../components/AdBanner';
 
 export default function SearchResults() {
   const [params] = useSearchParams();
@@ -89,13 +90,7 @@ export default function SearchResults() {
 
       {/* AdSense banner at the top */}
       <div className="my-6 flex justify-center">
-        <ins className="adsbygoogle"
-          style={{ display: 'block', width: '100%', height: '90px' }}
-          data-ad-client="ca-pub-7308197349797955"
-          data-ad-slot="1234567890" // replace with your slot ID
-          data-ad-format="auto"
-          data-full-width-responsive="true">
-        </ins>
+        <AdBanner adSlot="9922689026" />
       </div>
 
       {results.length === 0 ? (
@@ -109,12 +104,11 @@ export default function SearchResults() {
       {/* AdSense banner at the bottom */}
       {results.length > 0 && (
         <div className="my-6 flex justify-center">
-          <ins className="adsbygoogle"
-            style={{ display: 'block', width: '100%', height: '90px' }}
+          <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-format="autorelaxed"
             data-ad-client="ca-pub-7308197349797955"
-            data-ad-slot="1234567891" // replace with your slot ID
-            data-ad-format="auto"
-            data-full-width-responsive="true">
+            data-ad-slot="9100561942">
           </ins>
         </div>
       )}

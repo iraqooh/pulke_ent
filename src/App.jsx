@@ -18,9 +18,6 @@ function App() {
         <Route path="admin" element={<AdminPanel />} />
         <Route path="/admin/login" element={<AdminLogin />} />
       </Route>
-
-      {/* Login page can have no layout or a minimal one */}
-      {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
     </Routes>
   );
 }

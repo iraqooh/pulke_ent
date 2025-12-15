@@ -59,9 +59,10 @@ export default function SearchBar() {
               className="p-4 flex items-center space-x-4 border-b border-gray-700 cursor-pointer hover:bg-gray-700"
             >
               <img
-                src={item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/60'}
+                src={item.Poster !== 'N/A' ? item.Poster : '/poster.png'}
                 alt=""
                 className="w-12 h-18 object-cover rounded"
+                onError={(e) => e.currentTarget.src="/poster.png" }
               />
               <div>
                 <p className="font-medium">{item.Title}</p>

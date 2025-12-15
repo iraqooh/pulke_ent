@@ -3,16 +3,35 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { databases, DB_ID, LINKS_COLLECTION, SUGGESTIONS_COLLECTION, ID } from '../lib/appwrite';
 
+// AdBanner component for React
+function AdBanner({ adClient, adSlot, style = { display: 'block', width: '100%', height: 90 } }) {
+  useEffect(() => {
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (err) {
+      console.error('AdSense error:', err);
+    }
+  }, []);
+
+  return (
+    <ins className="adsbygoogle"
+         style={style}
+         data-ad-client={adClient}
+         data-ad-slot={adSlot}
+         data-ad-format="auto"
+         data-full-width-responsive="true">
+    </ins>
+  );
+}
+
 export default function AdminPanel() {
   const { user, logout, loading, setLoading } = useAuth();
   const navigate = useNavigate();
 
   const [suggestions, setSuggestions] = useState([]);
-  // const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [alert, setAlert] = useState(null);
 
-  // Direct add form
   const [imdbID, setImdbID] = useState('');
   const [quality, setQuality] = useState('');
   const [size, setSize] = useState('');
@@ -41,7 +60,6 @@ export default function AdminPanel() {
   const addLink = async (e) => {
     e.preventDefault();
     if (submitting) return;
-
     setSubmitting(true);
     setAlert(null);
 
@@ -52,12 +70,8 @@ export default function AdminPanel() {
         size,
         link,
       });
-
       setAlert({ type: 'success', message: 'Link added successfully.' });
-      setImdbID('');
-      setQuality('');
-      setSize('');
-      setLink('');
+      setImdbID(''); setQuality(''); setSize(''); setLink('');
     } catch {
       setAlert({ type: 'error', message: 'Failed to add link.' });
     } finally {
@@ -67,7 +81,6 @@ export default function AdminPanel() {
 
   const approveSuggestion = async (sug) => {
     if (submitting) return;
-
     setSubmitting(true);
     setAlert(null);
 
@@ -78,10 +91,8 @@ export default function AdminPanel() {
         size: sug.size,
         link: sug.link,
       });
-
       await databases.deleteDocument(DB_ID, SUGGESTIONS_COLLECTION, sug.$id);
       setSuggestions(prev => prev.filter(s => s.$id !== sug.$id));
-
       setAlert({ type: 'success', message: 'Suggestion approved and added.' });
     } catch {
       setAlert({ type: 'error', message: 'Approval failed.' });
@@ -92,7 +103,6 @@ export default function AdminPanel() {
 
   const discardSuggestion = async (sug) => {
     if (submitting) return;
-
     setSubmitting(true);
     setAlert(null);
 
@@ -118,6 +128,11 @@ export default function AdminPanel() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-10">
+      {/* Ad banner at the top */}
+      <div className="flex justify-center my-4">
+        <AdBanner adClient="ca-pub-7308197349797955" adSlot="1111111111" />
+      </div>
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold text-blue-300">Admin Panel</h2>
@@ -143,59 +158,16 @@ export default function AdminPanel() {
         </div>
       )}
 
-      {/* Add Link */}
+      {/* Add Link Form */}
       <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
         <h3 className="text-2xl font-bold mb-6 text-green-400">Add Link Directly</h3>
-
         <form onSubmit={addLink} className="grid md:grid-cols-2 gap-4">
-          <input
-            placeholder="IMDb ID (tt...)"
-            value={imdbID}
-            onChange={e => setImdbID(e.target.value)}
-            required
-            disabled={submitting}
-            className="px-4 py-2 bg-gray-700 rounded-lg"
-          />
-
-          <input
-            placeholder="Quality (e.g. 1080p Bluray)"
-            value={quality}
-            onChange={e => setQuality(e.target.value)}
-            required
-            disabled={submitting}
-            className="px-4 py-2 bg-gray-700 rounded-lg"
-          />
-
-          <input
-            placeholder="Size (e.g. 4.2 GB)"
-            value={size}
-            onChange={e => setSize(e.target.value)}
-            disabled={submitting}
-            className="px-4 py-2 bg-gray-700 rounded-lg"
-          />
-
-          <input
-            placeholder="Direct download link"
-            value={link}
-            onChange={e => setLink(e.target.value)}
-            required
-            disabled={submitting}
-            className="px-4 py-2 bg-gray-700 rounded-lg"
-          />
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className={`md:col-span-2 flex justify-center items-center gap-2 py-3 rounded-lg font-bold cursor-pointer
-              ${
-                submitting
-                  ? 'bg-green-800 cursor-not-allowed'
-                  : 'bg-green-600 hover:bg-green-700'
-              }`}
-          >
-            {submitting && (
-              <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            )}
+          <input placeholder="IMDb ID (tt...)" value={imdbID} onChange={e => setImdbID(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <input placeholder="Quality (e.g. 1080p Bluray)" value={quality} onChange={e => setQuality(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <input placeholder="Size (e.g. 4.2 GB)" value={size} onChange={e => setSize(e.target.value)} disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <input placeholder="Direct download link" value={link} onChange={e => setLink(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <button type="submit" disabled={submitting} className={`md:col-span-2 flex justify-center items-center gap-2 py-3 rounded-lg font-bold cursor-pointer ${submitting ? 'bg-green-800 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>
+            {submitting && <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             {submitting ? 'Adding…' : 'Add to Database'}
           </button>
         </form>
@@ -206,62 +178,30 @@ export default function AdminPanel() {
         <h3 className="text-2xl font-bold mb-4 text-orange-400">
           Pending Suggestions ({suggestions.length})
         </h3>
-
-        {suggestions.length === 0 && (
-          <p className="text-gray-400">No pending suggestions.</p>
-        )}
-
+        {suggestions.length === 0 && <p className="text-gray-400">No pending suggestions.</p>}
         <div className="space-y-4">
           {suggestions.map(sug => (
-            <div
-              key={sug.$id}
-              className="bg-gray-800 p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4"
-            >
+            <div key={sug.$id} className="bg-gray-800 p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="font-semibold">
                   <a href={`/movie/${sug.imdbId}`}>{sug.title} ({sug.year})</a>
                 </div>
-                <p className="text-gray-400">
-                  {sug.quality} • {sug.size}
-                </p>
-                <div className="text-sm break-all">
-                  <a href={sug.link} target='_blank'>{sug.link}</a>
-                </div>
-                {sug.suggesterEmail && (
-                  <p className="text-xs text-gray-400">
-                    From: {sug.suggesterEmail}
-                  </p>
-                )}
+                <p className="text-gray-400">{sug.quality} • {sug.size}</p>
+                <div className="text-sm break-all"><a href={sug.link} target='_blank'>{sug.link}</a></div>
+                {sug.suggesterEmail && <p className="text-xs text-gray-400">From: {sug.suggesterEmail}</p>}
               </div>
-
-              <button
-                onClick={() => approveSuggestion(sug)}
-                disabled={submitting}
-                className={`px-5 py-2 rounded-lg font-bold cursor-pointer
-                  ${
-                    submitting
-                      ? 'bg-green-800 cursor-not-allowed'
-                      : 'bg-green-600 hover:bg-green-700'
-                  }`}
-              >
-                Approve
-              </button>
-
-              <button
-                onClick={() => discardSuggestion(sug)}
-                disabled={submitting}
-                className={`px-5 py-2 rounded-lg font-bold cursor-pointer
-                  ${
-                    submitting
-                      ? 'bg-red-800 cursor-not-allowed'
-                      : 'bg-red-600 hover:bg-red-700'
-                  }`}
-              >
-                Discard
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => approveSuggestion(sug)} disabled={submitting} className={`px-5 py-2 rounded-lg font-bold cursor-pointer ${submitting ? 'bg-green-800 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>Approve</button>
+                <button onClick={() => discardSuggestion(sug)} disabled={submitting} className={`px-5 py-2 rounded-lg font-bold cursor-pointer ${submitting ? 'bg-red-800 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}>Discard</button>
+              </div>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Optional bottom ad */}
+      <div className="flex justify-center my-6">
+        <AdBanner adClient="ca-pub-7308197349797955" adSlot="2222222222" />
       </div>
     </div>
   );

@@ -12,17 +12,34 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    await account.createEmailPasswordSession(email, password);
-    setUser(await account.get());
+    const loggedIn = await account.createEmailPasswordSession({
+      email,
+      password
+    })
+    setUser(loggedIn)
+    // await account.createEmailPasswordSession({ email, password });
+    // setUser(await account.get());
   };
 
   const logout = async () => {
-    await account.deleteSession('current');
+    await account.deleteSession({
+      sessionId: 'current'
+    });
     setUser(null);
   };
 
+  const init = async () => {
+    try {
+      const loggedIn = await account.get()
+      setUser(loggedIn)
+    } catch (err) {
+      setUser(null)
+      console.error(`${err}`)
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, setLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, setLoading, init }}>
       {children}
     </AuthContext.Provider>
   );

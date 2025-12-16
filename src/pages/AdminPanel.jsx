@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { databases, DB_ID, LINKS_COLLECTION, SUGGESTIONS_COLLECTION, ID } from '../lib/appwrite';
+import { DB_ID, LINKS_COLLECTION, SUGGESTIONS_COLLECTION, ID, tablesDB } from '../lib/appwrite';
 import AdBanner from '../components/AdBanner';
 
 export default function AdminPanel() {
@@ -25,8 +25,12 @@ export default function AdminPanel() {
 
     const fetchSuggestions = async () => {
       try {
-        const res = await databases.listDocuments(DB_ID, SUGGESTIONS_COLLECTION);
-        setSuggestions(res.documents);
+        const res = await tablesDB.listRows({
+          databaseId: DB_ID, 
+          tableId: SUGGESTIONS_COLLECTION
+        });
+        setSuggestions(res.rows);
+        // console.log(res.rows)
       } catch {
         setAlert({ type: 'error', message: 'Failed to load suggestions.' });
       } finally {
@@ -44,11 +48,16 @@ export default function AdminPanel() {
     setAlert(null);
 
     try {
-      await databases.createDocument(DB_ID, LINKS_COLLECTION, ID.unique(), {
-        imdbId: imdbID,
-        quality,
-        size,
-        link,
+      await tablesDB.createRow({
+        databaseId: DB_ID, 
+        tableId: LINKS_COLLECTION, 
+        rowId: ID.unique(),
+        data: {
+          imdbId: imdbID,
+          quality,
+          size,
+          link
+        }
       });
       setAlert({ type: 'success', message: 'Link added successfully.' });
       setImdbID(''); setQuality(''); setSize(''); setLink('');
@@ -59,19 +68,32 @@ export default function AdminPanel() {
     }
   };
 
+  const deleteSuggestion = async (sug) => {
+    await tablesDB.deleteRow({
+        databaseId: DB_ID, 
+        tableId: SUGGESTIONS_COLLECTION, 
+        rowId: sug.$id
+    });
+  }
+
   const approveSuggestion = async (sug) => {
     if (submitting) return;
     setSubmitting(true);
     setAlert(null);
 
     try {
-      await databases.createDocument(DB_ID, LINKS_COLLECTION, ID.unique(), {
-        imdbId: sug.imdbId,
-        quality: sug.quality,
-        size: sug.size,
-        link: sug.link,
+      await tablesDB.createRow({
+        databaseId: DB_ID, 
+        tableId: LINKS_COLLECTION, 
+        rowId: ID.unique(), 
+        data: {
+          imdbId: sug.imdbId,
+          quality: sug.quality,
+          size: sug.size,
+          link: sug.link
+        }
       });
-      await databases.deleteDocument(DB_ID, SUGGESTIONS_COLLECTION, sug.$id);
+      await deleteSuggestion(sug)
       setSuggestions(prev => prev.filter(s => s.$id !== sug.$id));
       setAlert({ type: 'success', message: 'Suggestion approved and added.' });
     } catch {
@@ -87,7 +109,7 @@ export default function AdminPanel() {
     setAlert(null);
 
     try {
-      await databases.deleteDocument(DB_ID, SUGGESTIONS_COLLECTION, sug.$id);
+      await deleteSuggestion(sug)
       setSuggestions(prev => prev.filter(s => s.$id !== sug.$id));
       setAlert({ type: 'success', message: 'Suggestion discarded.' });
     } catch {
@@ -142,10 +164,10 @@ export default function AdminPanel() {
       <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
         <h3 className="text-2xl font-bold mb-6 text-green-400">Add Link Directly</h3>
         <form onSubmit={addLink} className="grid md:grid-cols-2 gap-4">
-          <input placeholder="IMDb ID (tt...)" value={imdbID} onChange={e => setImdbID(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
-          <input placeholder="Quality (e.g. 1080p Bluray)" value={quality} onChange={e => setQuality(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
-          <input placeholder="Size (e.g. 4.2 GB)" value={size} onChange={e => setSize(e.target.value)} disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
-          <input placeholder="Direct download link" value={link} onChange={e => setLink(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <input name="id" placeholder="IMDb ID (tt...)" value={imdbID} onChange={e => setImdbID(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <input name="quality" placeholder="Quality (e.g. 1080p Bluray)" value={quality} onChange={e => setQuality(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <input name="size" placeholder="Size (e.g. 4.2 GB)" value={size} onChange={e => setSize(e.target.value)} disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
+          <input name="link" placeholder="Direct download link" value={link} onChange={e => setLink(e.target.value)} required disabled={submitting} className="px-4 py-2 bg-gray-700 rounded-lg" />
           <button type="submit" disabled={submitting} className={`md:col-span-2 flex justify-center items-center gap-2 py-3 rounded-lg font-bold cursor-pointer ${submitting ? 'bg-green-800 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>
             {submitting && <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             {submitting ? 'Adding…' : 'Add to Database'}

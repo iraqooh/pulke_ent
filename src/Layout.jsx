@@ -1,10 +1,10 @@
 // src/Layout.jsx
-import { Outlet, useNavigate, Link } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import SearchBar from './components/SearchBar';
 import { Toaster } from 'react-hot-toast';
 
 export default function Layout() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col">
@@ -13,11 +13,13 @@ export default function Layout() {
         <div className="px-4 py-4">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <h1
-              onClick={() => navigate('/')}
+              // onClick={() => navigate('/')}
               className="text-lg md:text-3xl font-bold text-blue-400 cursor-pointer"
             >
-              <i className="fas fa-film mr-2"></i>
-              Pulke ENT
+              <a href="/">
+                <i className="fas fa-film mr-2"></i>
+                Pulke ENT
+              </a>
             </h1>
             <SearchBar />
           </div>

@@ -27,8 +27,24 @@ export default function AdminLogin() {
     <div className="max-w-md mx-auto bg-gray-800 p-8 rounded-xl">
       <h2 className="text-3xl font-bold mb-6">Admin Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input 
+          type="email" 
+          value={email} 
+          onChange={e => setEmail(e.target.value)}
+          name="email" 
+          placeholder="Email" 
+          required 
+          className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        />
+        <input 
+          type="password" 
+          value={password} 
+          onChange={e => setPassword(e.target.value)}
+          name="password" 
+          placeholder="Password" 
+          required 
+          className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        />
         <button 
           type="submit" 
           disabled={logging}

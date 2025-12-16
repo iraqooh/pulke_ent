@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { databases, DB_ID, LINKS_COLLECTION, SUGGESTIONS_COLLECTION, ID } from '../lib/appwrite';
+import { DB_ID, LINKS_COLLECTION, SUGGESTIONS_COLLECTION, ID, tablesDB } from '../lib/appwrite';
 import { Query } from 'appwrite';
 import toast from 'react-hot-toast';
 import { fetchById } from '../lib/omdb';
@@ -27,10 +27,12 @@ export default function MovieDetails() {
       // console.log(data)
 
       try {
-        const response = await databases.listDocuments(DB_ID, LINKS_COLLECTION, [
-          Query.equal('imdbId', imdbID)
-        ]);
-        const filtered = response.documents.filter(doc => doc.imdbId === imdbID);
+        const response = await tablesDB.listRows({
+          databaseId: DB_ID, 
+          tableId: LINKS_COLLECTION, 
+          queries: [Query.equal('imdbId', imdbID)]
+        });
+        const filtered = response.rows.filter(doc => doc.imdbId === imdbID);
         setLinks(filtered.map(doc => ({ quality: doc.quality, size: doc.size, link: doc.link })));
       } catch (err) {
         console.error(err);
@@ -47,14 +49,19 @@ export default function MovieDetails() {
     setSubmitting(true);
 
     try {
-      await databases.createDocument(DB_ID, SUGGESTIONS_COLLECTION, ID.unique(), {
-        imdbId: imdbID,
-        title: movie.Title,
-        year: movie.Year,
-        quality,
-        size,
-        link,
-        suggesterEmail: email || null,
+      await tablesDB.createRow({
+        databaseId: DB_ID, 
+        tableId: SUGGESTIONS_COLLECTION, 
+        rowId: ID.unique(), 
+        data: {
+          imdbId: imdbID,
+          title: movie.Title,
+          year: movie.Year,
+          quality,
+          size,
+          link,
+          suggesterEmail: email || null
+        }
       });
 
       toast.success('Suggestion submitted successfully!');
@@ -190,10 +197,10 @@ export default function MovieDetails() {
             <div className="bg-gray-700 p-6 rounded-xl">
               <h3 className="text-xl font-bold mb-4 text-blue-300">Missing a link? Suggest one!</h3>
               <form onSubmit={handleSuggest} className="space-y-4">
-                <input type="text" placeholder="e.g. Season 2 1080p Bluray" value={quality} onChange={e => setQuality(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <input type="text" placeholder="e.g. 4.2 GB" value={size} onChange={e => setSize(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
-                <input type="url" placeholder="Direct download link" value={link} onChange={e => setLink(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <input type="email" placeholder="Your email (optional)" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
+                <input type="text" name="quality" placeholder="e.g. Season 2 1080p Bluray" value={quality} onChange={e => setQuality(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input type="text" name="size" placeholder="e.g. 4.2 GB" value={size} onChange={e => setSize(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
+                <input type="url" name="link" placeholder="Direct download link" value={link} onChange={e => setLink(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input type="email" name="email" placeholder="Your email (optional)" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
                 <button
                   type="submit"
                   disabled={submitting}

@@ -44,6 +44,7 @@ export default function SearchBar() {
     <div className="relative w-full max-w-xl">
       <input
         type="text"
+        name="search"
         value={query}
         onChange={handleInput}
         onKeyPress={handleKeyPress}

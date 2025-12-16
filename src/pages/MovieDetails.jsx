@@ -24,6 +24,7 @@ export default function MovieDetails() {
     const fetchMovie = async () => {
       const data = await fetchById(imdbID);
       setMovie(data);
+      // console.log(data)
 
       try {
         const response = await databases.listDocuments(DB_ID, LINKS_COLLECTION, [
@@ -90,76 +91,88 @@ export default function MovieDetails() {
         <button onClick={() => navigate(-1)} className="mb-6 text-blue-400 hover:underline text-lg">← Back</button>
 
         <div className="grid md:grid-cols-3 gap-8 bg-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+          {/* Poster */}
           <div>
-            <img 
-              src={movie.Poster !== 'N/A' ? movie.Poster : '/poster.png'} 
-              alt={movie.Title} 
-              className="w-full" 
+            <img
+              src={movie.Poster !== 'N/A' ? movie.Poster : '/poster.png'}
+              alt={movie.Title}
+              className="w-full"
               onError={(e) => { e.currentTarget.src = '/poster.png'; }}
             />
           </div>
 
-          <div className="md:col-span-2 p-6">
-            <h1 className="text-4xl font-bold mb-2">{movie.Title}</h1>
-            <p className="text-2xl text-gray-400 mb-4">{movie.Year} • {movie.Type.toUpperCase()}</p>
-            <p className="text-yellow-400 text-xl mb-4">IMDb {movie.imdbRating} / 10</p>
-            <p className="text-gray-300 mb-6 leading-relaxed">{movie.Plot}</p>
+          {/* Movie Info */}
+          <div className="md:col-span-2 p-6 space-y-4">
+            <h1 className="text-4xl font-bold">{movie.Title}</h1>
+            <p className="text-xl text-gray-400">
+              {movie.Type.toUpperCase()} • {movie.ReleaseDate}
+            </p>
+
+            <p className="text-gray-300 mb-2">
+              {movie.Genres} • {movie.Runtime !== 'N/A' ? `${movie.Runtime} •` : ""} IMDb {movie.imdbRating} / 10
+            </p>
+
+            <p className="text-gray-300 leading-relaxed">{movie.Plot}</p>
+
+            {/* Crew & Cast */}
+            <div className="space-y-1 text-gray-300 text-sm">
+              {movie.Director && <p><strong>Director:</strong> {movie.Director}</p>}
+              {movie.Type === 'series' && <p><strong>Creators:</strong> {movie.Creators}</p>}
+              {movie.Type === 'movie' && <p><strong>Writers:</strong> {movie.Writer}</p>}
+              {movie.Actors && <p><strong>Actors:</strong> {movie.Actors}</p>}
+            </div>
 
             {/* Ad above download links */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center my-6">
               <AdBanner adSlot="1601345877" />
             </div>
 
-            <div className="space-y-6">
-              {hasLinks ? (
-                <div>
-                  <h3 className="text-2xl font-bold mb-4 text-green-400">Download Links</h3>
-                  {links.map((l, i) => (
-                    <a key={i} href={l.link} target="_blank" rel="noopener noreferrer"
-                      className="block mb-3 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-8 rounded-lg text-center transition">
-                      {l.quality} • {l.size}
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-orange-900/40 p-6 rounded-xl border border-orange-600">
-                  <p className="text-orange-300 text-lg">No download links yet.</p>
-                </div>
-              )}
-
-              {/* Ad below suggestion form */}
-              <div className="flex justify-center my-6">
-                <AdBanner adSlot="7548818887" />
+            {/* Download Links */}
+            {hasLinks ? (
+              <div>
+                <h3 className="text-2xl font-bold mb-4 text-green-400">Download Links</h3>
+                {links.map((l, i) => (
+                  <a key={i} href={l.link} target="_blank" rel="noopener noreferrer"
+                     className="block mb-3 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-8 rounded-lg text-center transition">
+                    {l.quality} • {l.size}
+                  </a>
+                ))}
               </div>
-
-              <div className="bg-gray-700 p-6 rounded-xl">
-                <h3 className="text-xl font-bold mb-4 text-blue-300">Missing a link? Suggest one!</h3>
-                <form onSubmit={handleSuggest} className="space-y-4">
-                  <input type="text" placeholder="e.g. Season 2 1080p Bluray" value={quality} onChange={e => setQuality(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  <input type="text" placeholder="e.g. 4.2 GB" value={size} onChange={e => setSize(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
-                  <input type="url" placeholder="Direct download link" value={link} onChange={e => setLink(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  <input type="email" placeholder="Your email (optional)" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition
-                      ${
-                        submitting
-                          ? 'bg-blue-800 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
-                  >
-                    {submitting && (
-                      <span
-                        className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"
-                        aria-hidden="true"
-                      />
-                    )}
-                    {submitting ? 'Submitting...' : 'Send Suggestion'}
-                  </button>
-                </form>
-                <p className="text-xs text-gray-400 mt-3">Your suggestion will be reviewed and added if valid.</p>
+            ) : (
+              <div className="bg-orange-900/40 p-6 rounded-xl border border-orange-600">
+                <p className="text-orange-300 text-lg">No download links yet.</p>
               </div>
+            )}
+
+            {/* Ad below suggestion form */}
+            <div className="flex justify-center my-6">
+              <AdBanner adSlot="7548818887" />
+            </div>
+
+            {/* Suggestion Form */}
+            <div className="bg-gray-700 p-6 rounded-xl">
+              <h3 className="text-xl font-bold mb-4 text-blue-300">Missing a link? Suggest one!</h3>
+              <form onSubmit={handleSuggest} className="space-y-4">
+                <input type="text" placeholder="e.g. Season 2 1080p Bluray" value={quality} onChange={e => setQuality(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input type="text" placeholder="e.g. 4.2 GB" value={size} onChange={e => setSize(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
+                <input type="url" placeholder="Direct download link" value={link} onChange={e => setLink(e.target.value)} required className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input type="email" placeholder="Your email (optional)" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-2 bg-gray-800 rounded-lg" />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition
+                    ${submitting ? 'bg-blue-800 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                >
+                  {submitting && (
+                    <span
+                      className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+                      aria-hidden="true"
+                    />
+                  )}
+                  {submitting ? 'Submitting...' : 'Send Suggestion'}
+                </button>
+              </form>
+              <p className="text-xs text-gray-400 mt-3">Your suggestion will be reviewed and added if valid.</p>
             </div>
           </div>
         </div>

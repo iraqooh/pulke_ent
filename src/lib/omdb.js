@@ -31,31 +31,43 @@ function normalizeToOmdb(item, imdbId, mediaType) {
 //     return res.json()
 // }
 
-export async function fetchById(imdbId) {
-    // Step 1: Find TMDB movie using IMDb ID
-    const findRes = await fetch(
-        `${BASE_URL}/find/${imdbId}?api_key=${TMDB_API_KEY}&external_source=imdb_id`,
-        { headers }
-    )
+export async function fetchById(imdbID) {
+  // First, find the TMDB ID via /find
+  const findRes = await fetch(`${BASE_URL}/find/${imdbID}?api_key=${TMDB_API_KEY}&external_source=imdb_id`);
+  const findData = await findRes.json();
 
-    const data = await findRes.json()
+  const item = findData.movie_results[0] || findData.tv_results[0];
+  if (!item) return { Response: 'False' };
 
-    let item = null
-    let mediaType = null
+  const media_type = item.media_type || 'movie'; // fallback if needed
+  const id = item.id;
 
-    if (data.movie_results?.length) {
-        item = data.movie_results[0]
-        mediaType = 'movie'
-    } else if (data.tv_results?.length) {
-        item = data.tv_results[0]
-        mediaType = 'series'
-    }
+  // Fetch full details with credits
+  const detailsRes = await fetch(`${BASE_URL}/${media_type}/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits`);
+  const details = await detailsRes.json();
+  console.log(details);
 
-    if (!item) {
-        return { Response: 'False', Error: 'Not found' }
-    }
+  // Normalize to OMDb-compatible structure, but include extra fields
+  const normalized = {
+    Response: 'True',
+    Title: details.title || details.name,
+    Year: details.release_date ? details.release_date.split('-')[0] : 'N/A',
+    Type: media_type === 'tv' ? 'series' : 'movie',
+    Plot: details.overview,
+    Poster: details.poster_path ? `https://image.tmdb.org/t/p/w500${details.poster_path}` : '/poster.png',
+    imdbID,
+    imdbRating: details.vote_average?.toFixed(1) || 'N/A',
+    imdbVotes: details.vote_count || 'N/A',
+    Runtime: details.runtime ? `${details.runtime} min` : details.episode_run_time?.[0] ? `${details.episode_run_time[0]} min` : 'N/A',
+    Genres: details.genres?.map(g => g.name).join(', ') || 'N/A',
+    Director: details.credits?.crew?.filter(c => c.job === 'Director').map(d => d.name).join(', ') || 'N/A',
+    Creators: details.created_by?.map(d => d.name).join(', ') || 'N/A',
+    Writer: details.credits?.crew?.filter(c => c.job === 'Writer' || c.job === 'Screenplay').map(w => w.name).join(', ') || 'N/A',
+    Actors: details.credits?.cast?.slice(0, 5).map(a => a.name).join(', ') || 'N/A',
+    ReleaseDate: details.release_date || details.first_air_date || 'N/A'
+  };
 
-    return normalizeToOmdb(item, imdbId, mediaType)
+  return normalized;
 }
 
 // export async function searchTitles(query) {

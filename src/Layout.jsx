@@ -51,8 +51,8 @@ export default function Layout() {
             <h4 className="font-semibold mb-3">Navigation</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li><Link to="/" className="hover:text-blue-400">Home</Link></li>
-              <li><Link to="/search" className="hover:text-blue-400">Search</Link></li>
-              <li><Link to="/trending" className="hover:text-blue-400">Trending</Link></li>
+              <li><Link to="/admin" className="hover:text-blue-400">Admin</Link></li>
+              {/* <li><Link to="/trending" className="hover:text-blue-400">Trending</Link></li> */}
             </ul>
           </div>
 
@@ -62,7 +62,7 @@ export default function Layout() {
             <ul className="space-y-2 text-sm text-gray-400">
               <li><a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">TMDB</a></li>
               <li><a href="https://www.imdb.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">IMDb</a></li>
-              <li><a href="#" className="hover:text-blue-400">API Status</a></li>
+              {/* <li><a href="#" className="hover:text-blue-400">API Status</a></li> */}
             </ul>
           </div>
 
@@ -70,9 +70,9 @@ export default function Layout() {
           <div>
             <h4 className="font-semibold mb-3">Legal</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link to="/privacy" className="hover:text-blue-400">Privacy Policy</Link></li>
-              <li><Link to="/terms" className="hover:text-blue-400">Terms of Service</Link></li>
-              <li><Link to="/dmca" className="hover:text-blue-400">DMCA</Link></li>
+              <li><Link to="https://www.termsfeed.com/live/a6ba75e7-519d-4285-864f-aa4c8eb2050b" className="hover:text-blue-400">Privacy Policy</Link></li>
+              <li><Link to="https://www.termsfeed.com/live/a80fe102-e0f1-40c0-b62f-b08d58ceac73" className="hover:text-blue-400">Terms of Service</Link></li>
+              {/* <li><Link to="/dmca" className="hover:text-blue-400">DMCA</Link></li> */}
             </ul>
           </div>
         </div>

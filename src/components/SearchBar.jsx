@@ -18,14 +18,11 @@ export default function SearchBar() {
       return;
     }
 
-    
-    const data = await searchTitles(q);
-
-    if (data.Response === 'True') {
+    const data = await searchTitles(q); // use q, not query
+    if (data.Search && data.Search.length) {
       setSuggestions(data.Search.slice(0, 8));
       setShowSuggestions(true);
     } else {
-      setSuggestions([]);
       setShowSuggestions(false);
     }
   };
@@ -37,9 +34,9 @@ export default function SearchBar() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && query) {
+    if (e.key === 'Enter' && query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
-      setShowSuggestions(false);
+      setShowSuggestions(false); // hide suggestions when navigating to search results
     }
   };
 
@@ -49,15 +46,14 @@ export default function SearchBar() {
         type="text"
         value={query}
         onChange={handleInput}
-        onKeyDown={handleKeyPress}
+        onKeyPress={handleKeyPress}
         placeholder="Search movies or TV shows..."
         className="w-full px-5 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         autoComplete="off"
       />
-
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 bg-gray-800 border border-gray-700 rounded-lg mt-2 max-h-96 overflow-y-auto shadow-2xl z-50">
-          {suggestions.map(item => (
+          {suggestions.map((item) => (
             <div
               key={item.imdbID}
               onClick={() => goToDetails(item.imdbID, item.Title)}
@@ -67,7 +63,7 @@ export default function SearchBar() {
                 src={item.Poster !== 'N/A' ? item.Poster : '/poster.png'}
                 alt=""
                 className="w-12 h-18 object-cover rounded"
-                onError={e => (e.currentTarget.src = '/poster.png')}
+                onError={(e) => (e.currentTarget.src = '/poster.png')}
               />
               <div>
                 <p className="font-medium">{item.Title}</p>

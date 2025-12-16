@@ -43,7 +43,7 @@ export default function SearchResults() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center py-20 gap-4">
         <span className="h-10 w-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
         <p className="text-blue-300 font-semibold text-lg">
           Searching for "{query}"…

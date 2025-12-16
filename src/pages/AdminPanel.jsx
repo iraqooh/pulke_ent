@@ -2,27 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { databases, DB_ID, LINKS_COLLECTION, SUGGESTIONS_COLLECTION, ID } from '../lib/appwrite';
-
-// AdBanner component for React
-function AdBanner({ adClient, adSlot, style = { display: 'block', width: '100%', height: 90 } }) {
-  useEffect(() => {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error('AdSense error:', err);
-    }
-  }, []);
-
-  return (
-    <ins className="adsbygoogle"
-         style={style}
-         data-ad-client={adClient}
-         data-ad-slot={adSlot}
-         data-ad-format="auto"
-         data-full-width-responsive="true">
-    </ins>
-  );
-}
+import AdBanner from '../components/AdBanner';
 
 export default function AdminPanel() {
   const { user, logout, loading, setLoading } = useAuth();
@@ -119,7 +99,7 @@ export default function AdminPanel() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center py-20 gap-4">
         <span className="h-10 w-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
         <p className="text-blue-300 font-semibold">Loading admin panel…</p>
       </div>
@@ -128,11 +108,6 @@ export default function AdminPanel() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-10">
-      {/* Ad banner at the top */}
-      <div className="flex justify-center my-4">
-        <AdBanner adClient="ca-pub-7308197349797955" adSlot="1111111111" />
-      </div>
-
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold text-blue-300">Admin Panel</h2>
@@ -142,6 +117,11 @@ export default function AdminPanel() {
         >
           Logout
         </button>
+      </div>
+
+      {/* Ad banner at the top */}
+      <div className="flex justify-center my-4">
+        <AdBanner adSlot="2893697503" />
       </div>
 
       {/* Alert */}
@@ -201,7 +181,7 @@ export default function AdminPanel() {
 
       {/* Optional bottom ad */}
       <div className="flex justify-center my-6">
-        <AdBanner adClient="ca-pub-7308197349797955" adSlot="2222222222" />
+        <AdBanner adSlot="8936361679" />
       </div>
     </div>
   );

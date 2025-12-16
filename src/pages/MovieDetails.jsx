@@ -66,7 +66,19 @@ export default function MovieDetails() {
     }
   };
 
-  if (loading || !movie) return <div className="loader mx-auto"></div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <span
+          className="h-10 w-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"
+          aria-hidden="true"
+        />
+        <p className="text-blue-300 text-lg font-semibold">
+          Loading movie/TV show details...
+        </p>
+      </div>
+    );
+  }
 
   const hasLinks = links.length > 0;
 
@@ -103,24 +115,49 @@ export default function MovieDetails() {
 
           {/* Movie Info */}
           <div className="md:col-span-2 p-6 space-y-4">
+            <div className="md:col-span-2 p-6 space-y-4">
             <h1 className="text-4xl font-bold">{movie.Title}</h1>
+
+            {/* Type + Release Date */}
             <p className="text-xl text-gray-400">
-              {movie.Type.toUpperCase()} • {movie.ReleaseDate}
+              {movie.Type.toUpperCase()} • {movie.ReleaseDate || 'Unknown'}
             </p>
 
-            <p className="text-gray-300 mb-2">
-              {movie.Genres} • {movie.Runtime !== 'N/A' ? `${movie.Runtime} •` : ""} IMDb {movie.imdbRating} / 10
-            </p>
+            {/* Runtime & Rating */}
+            <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm mt-1">
+              {movie.Runtime && movie.Runtime !== 'N/A' && (
+                <span className="px-2 py-1 bg-gray-700 rounded-full">{movie.Runtime}</span>
+              )}
+              {movie.imdbRating && movie.imdbRating !== 'N/A' && (
+                <span className="px-2 py-1 bg-yellow-600 text-black font-semibold rounded-full">
+                  IMDb {movie.imdbRating} / 10
+                </span>
+              )}
+            </div>
 
-            <p className="text-gray-300 leading-relaxed">{movie.Plot}</p>
+            {/* Genres as pills */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {movie.Genres?.split(',').map((g) => (
+                <span
+                  key={g}
+                  className="px-3 py-1 bg-blue-600 text-white rounded-full text-xs font-medium"
+                >
+                  {g.trim()}
+                </span>
+              ))}
+            </div>
+
+            {/* Plot */}
+            <p className="text-gray-300 leading-relaxed mt-4">{movie.Plot}</p>
 
             {/* Crew & Cast */}
-            <div className="space-y-1 text-gray-300 text-sm">
+            <div className="space-y-1 text-gray-300 text-sm mt-2">
               {movie.Director && <p><strong>Director:</strong> {movie.Director}</p>}
-              {movie.Type === 'series' && <p><strong>Creators:</strong> {movie.Creators}</p>}
-              {movie.Type === 'movie' && <p><strong>Writers:</strong> {movie.Writer}</p>}
+              {movie.Type === 'series' && movie.Creators && <p><strong>Creators:</strong> {movie.Creators}</p>}
+              {movie.Type === 'movie' && movie.Writer && <p><strong>Writers:</strong> {movie.Writer}</p>}
               {movie.Actors && <p><strong>Actors:</strong> {movie.Actors}</p>}
             </div>
+          </div>
 
             {/* Ad above download links */}
             <div className="flex justify-center my-6">

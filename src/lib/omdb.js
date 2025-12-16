@@ -45,7 +45,7 @@ export async function fetchById(imdbID) {
   // Fetch full details with credits
   const detailsRes = await fetch(`${BASE_URL}/${media_type}/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits`);
   const details = await detailsRes.json();
-  console.log(details);
+  // console.log(details);
 
   // Normalize to OMDb-compatible structure, but include extra fields
   const normalized = {

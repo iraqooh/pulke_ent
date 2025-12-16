@@ -1,25 +1,20 @@
 import { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import AdBanner from '../components/AdBanner';
-import { fetchById } from '../lib/omdb';
-
-const trendingIds = [
-  "tt0944947","tt0903747","tt4574334","tt0411008","tt0108778","tt0149460",
-  "tt1190634","tt2802850","tt2707408","tt0773262","tt1442449","tt1475582",
-];
+import { fetchTrending } from '../lib/omdb';
 
 export default function Home() {
   const [trending, setTrending] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTrending = async () => {
-      const promises = trendingIds.map(id => fetchById(id));
-      const results = await Promise.all(promises);
-      setTrending(results.filter(r => r.Response === 'True'));
+    const loadTrending = async () => {
+      const data = await fetchTrending();
+      setTrending(data.slice(0, 12)); // limit for layout
       setLoading(false);
     };
-    fetchTrending();
+
+    loadTrending();
   }, []);
 
   if (loading) {

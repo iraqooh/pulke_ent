@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchTitles } from '../lib/omdb.js'
+import { searchTitles } from '../lib/omdb.js';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
@@ -11,17 +11,21 @@ export default function SearchBar() {
   const handleInput = async (e) => {
     const q = e.target.value;
     setQuery(q);
+
     if (q.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
-    const data = await searchTitles(query);
-    if (data.Search) {
+    
+    const data = await searchTitles(q);
+
+    if (data.Response === 'True') {
       setSuggestions(data.Search.slice(0, 8));
       setShowSuggestions(true);
     } else {
+      setSuggestions([]);
       setShowSuggestions(false);
     }
   };
@@ -45,14 +49,15 @@ export default function SearchBar() {
         type="text"
         value={query}
         onChange={handleInput}
-        onKeyPress={handleKeyPress}
+        onKeyDown={handleKeyPress}
         placeholder="Search movies or TV shows..."
         className="w-full px-5 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         autoComplete="off"
       />
+
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 bg-gray-800 border border-gray-700 rounded-lg mt-2 max-h-96 overflow-y-auto shadow-2xl z-50">
-          {suggestions.map((item) => (
+          {suggestions.map(item => (
             <div
               key={item.imdbID}
               onClick={() => goToDetails(item.imdbID, item.Title)}
@@ -62,11 +67,13 @@ export default function SearchBar() {
                 src={item.Poster !== 'N/A' ? item.Poster : '/poster.png'}
                 alt=""
                 className="w-12 h-18 object-cover rounded"
-                onError={(e) => e.currentTarget.src="/poster.png" }
+                onError={e => (e.currentTarget.src = '/poster.png')}
               />
               <div>
                 <p className="font-medium">{item.Title}</p>
-                <p className="text-xs text-gray-400">{item.Year} • {item.Type}</p>
+                <p className="text-xs text-gray-400">
+                  {item.Year} • {item.Type}
+                </p>
               </div>
             </div>
           ))}

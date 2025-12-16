@@ -1,7 +1,5 @@
 import { useEffect, useRef, memo } from 'react';
 
-let adsScriptLoaded = false;
-
 function AdBanner({ adSlot, style = { display: 'block', width: '100%', height: 90 } }) {
   const adRef = useRef(null);
 
@@ -12,15 +10,6 @@ function AdBanner({ adSlot, style = { display: 'block', width: '100%', height: 9
     // 🔑 CRITICAL: AdSense internal guard
     if (ins.dataset.adsbygoogleStatus === 'done') {
       return;
-    }
-
-    if (!adsScriptLoaded) {
-      const script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
-      script.async = true;
-      script.setAttribute('data-ad-client', 'ca-pub-7308197349795');
-      document.head.appendChild(script);
-      adsScriptLoaded = true;
     }
 
     try {
